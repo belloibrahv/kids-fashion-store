@@ -104,19 +104,18 @@ export default function TeamPage() {
                     whileHover={{ scale: 1.05 }}
                     className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-primary-200 to-secondary-200"
                   >
-                    {currentMember.image && (
-                      <Image
-                        src={currentMember.image}
-                        alt={currentMember.name}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
-                    {!currentMember.image && (
-                      <div className="w-full h-full flex items-center justify-center text-6xl font-bold text-white">
-                        {currentMember.name.charAt(0)}
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-white/30 flex items-center justify-center">
+                          <svg className="w-20 h-20 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <div className="text-4xl font-bold text-white">
+                          {currentMember.name.split(' ')[0]}
+                        </div>
                       </div>
-                    )}
+                    </div>
                   </motion.div>
 
                   {/* Info */}
@@ -213,20 +212,10 @@ export default function TeamPage() {
                     : 'bg-white/50 hover:bg-white hover:shadow-md'
                 }`}
               >
-                <div className="relative w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-primary-200 to-secondary-200">
-                  {member.image && (
-                    <Image
-                      src={member.image}
-                      alt={member.name}
-                      fill
-                      className="object-cover"
-                    />
-                  )}
-                  {!member.image && (
-                    <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white">
-                      {member.name.charAt(0)}
-                    </div>
-                  )}
+                <div className="relative w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-primary-200 to-secondary-200 flex items-center justify-center">
+                  <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
                 </div>
                 <p className="font-semibold text-sm mb-1">{member.name}</p>
                 <p className="text-xs text-gray-600 line-clamp-2">{member.role}</p>
