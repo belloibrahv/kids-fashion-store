@@ -22,7 +22,7 @@ function ProductsContent() {
   const [selectedGender, setSelectedGender] = useState<Gender | 'all'>(
     (gender as Gender) || 'all'
   );
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [sortBy, setSortBy] = useState<'popular' | 'price-low' | 'price-high' | 'newest'>('popular');
 
   const filteredProducts = useMemo(() => {
@@ -107,7 +107,7 @@ function ProductsContent() {
     setSelectedAgeGroups([]);
     setSelectedColors([]);
     setSelectedGender('all');
-    setPriceRange([0, 100]);
+    setPriceRange([0, 100000]);
   };
 
   return (
@@ -220,14 +220,15 @@ function ProductsContent() {
                 <input
                   type="range"
                   min="0"
-                  max="100"
+                  max="100000"
+                  step="1000"
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
                   className="w-full"
                 />
                 <div className="flex justify-between text-sm text-gray-600 mt-2">
-                  <span>${priceRange[0]}</span>
-                  <span>${priceRange[1]}</span>
+                  <span>₦{priceRange[0].toLocaleString()}</span>
+                  <span>₦{priceRange[1].toLocaleString()}</span>
                 </div>
               </div>
             </div>
