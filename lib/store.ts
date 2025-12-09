@@ -1,59 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { CartItem, Order, Product, Size, Color, ShippingAddress } from '@/types';
+import { CartItem, Order, Product, Size, Color, ShippingAddress, Complaint, ComplaintType } from '@/types';
 
-// User Authentication
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  isLoggedIn: boolean;
-}
-
-interface UserStore {
-  user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, phone: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  updateProfile: (data: Partial<User>) => void;
-}
-
-// Wishlist
-interface WishlistStore {
-  items: Product[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: string) => void;
-  isInWishlist: (productId: string) => boolean;
-  clearWishlist: () => void;
-}
-
-// Addresses
-interface AddressStore {
-  addresses: ShippingAddress[];
-  defaultAddressId: string | null;
-  addAddress: (address: ShippingAddress) => void;
-  updateAddress: (id: string, address: ShippingAddress) => void;
-  deleteAddress: (id: string) => void;
-  setDefaultAddress: (id: string) => void;
-  getDefaultAddress: () => ShippingAddress | null;
-}
-
-// Notifications
-interface Notification {
-  id: string;
-  type: 'success' | 'error' | 'info' | 'warning';
-  message: string;
-  timestamp: Date;
-  read: boolean;
-}
-
-interface NotificationStore {
-  notifications: Notification[];
-  addNotification: (type: Notification['type'], message: string) => void;
-  markAsRead: (id: string) => void;
-  clearNotifications: () => void;
-  getUnreadCount: () => number;
+// Complaints Store
+interface ComplaintStore {
+  complaints: Complaint[];
+  addComplaint: (complaint: Complaint) => void;
+  getComplaintsByOrderId: (orderId: string) => Complaint[];
+  updateComplaintStatus: (id: string, status: Complaint['status']) => void;
 }
 
 interface CartStore {
@@ -177,3 +131,29 @@ export const useSearchStore = create<SearchStore>((set) => ({
   searchQuery: '',
   setSearchQuery: (query) => set({ searchQuery: query }),
 }));
+
+export const useComplaintStore = create<ComplaintStore>()(
+  persist(
+    (set, get) => ({
+      complaints: [],
+      addComplaint: (complaint) => {
+        set((state) => ({
+          complaints: [complaint, ...state.complaints],
+        }));
+      },
+      getComplaintsByOrderId: (orderId) => {
+        return get().complaints.filter((complaint) => complaint.orderId === orderId);
+      },
+      updateComplaintStatus: (id, status) => {
+        set((state) => ({
+          complaints: state.complaints.map((complaint) =>
+            complaint.id === id ? { ...complaint, status } : complaint
+          ),
+        }));
+      },
+    }),
+    {
+      name: 'complaints-storage',
+    }
+  )
+);

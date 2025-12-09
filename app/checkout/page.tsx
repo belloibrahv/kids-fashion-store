@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { CreditCard, Lock } from 'lucide-react';
+import { CreditCard, Lock, MapPin, ShoppingBag } from 'lucide-react';
 import { useCartStore, useOrderStore } from '@/lib/store';
 import { formatPrice, generateOrderId, generateTrackingNumber, getEstimatedDeliveryDate } from '@/lib/utils';
-import { ShippingAddress } from '@/types';
+import { ShippingAddress, PaymentMethod } from '@/types';
 import Button from '@/components/ui/button';
 import Input from '@/components/ui/input';
 import Card from '@/components/ui/card';
+import PaymentModal from '@/components/payment-modal';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -25,30 +26,30 @@ export default function CheckoutPage() {
     city: '',
     state: '',
     zipCode: '',
-    country: 'USA',
+    country: 'Nigeria',
   });
 
-  const [cardDetails, setCardDetails] = useState({
-    cardNumber: '',
-    cardName: '',
-    expiryDate: '',
-    cvv: '',
-  });
-
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isValidatingAddress, setIsValidatingAddress] = useState(false);
 
   const total = getCartTotal();
-  const shipping = total > 50 ? 0 : 5.99;
+  const shipping = total > 50000 ? 0 : 5990;
   const tax = total * 0.08;
   const grandTotal = total + shipping + tax;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsProcessing(true);
+    setIsValidatingAddress(true);
 
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Simulate address validation
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsValidatingAddress(false);
 
+    // Show payment modal
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = (paymentMethod: PaymentMethod) => {
     // Create order
     const order = {
       id: generateOrderId(),
@@ -58,6 +59,8 @@ export default function CheckoutPage() {
       tax,
       total: grandTotal,
       shippingAddress,
+      paymentMethod,
+      paymentStatus: 'completed' as const,
       status: 'confirmed' as const,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -68,7 +71,8 @@ export default function CheckoutPage() {
     addOrder(order);
     clearCart();
     
-    router.push(`/orders/${order.id}`);
+    // Redirect to order confirmation page
+    router.push(`/order-confirmation/${order.id}`);
   };
 
   if (items.length === 0) {
@@ -145,48 +149,28 @@ export default function CheckoutPage() {
                 </div>
               </Card>
 
-              {/* Payment */}
+              {/* Payment Notice */}
               <Card>
                 <div className="p-6">
-                  <div className="flex items-center gap-2 mb-6">
+                  <div className="flex items-center gap-2 mb-4">
                     <CreditCard className="w-6 h-6 text-primary-500" />
-                    <h2 className="text-2xl font-bold">Payment Information</h2>
+                    <h2 className="text-2xl font-bold">Payment</h2>
                     <Lock className="w-4 h-4 text-gray-400 ml-auto" />
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <Input
-                      label="Card Number"
-                      placeholder="1234 5678 9012 3456"
-                      required
-                      value={cardDetails.cardNumber}
-                      onChange={(e) => setCardDetails({ ...cardDetails, cardNumber: e.target.value })}
-                      className="md:col-span-2"
-                    />
-                    <Input
-                      label="Cardholder Name"
-                      required
-                      value={cardDetails.cardName}
-                      onChange={(e) => setCardDetails({ ...cardDetails, cardName: e.target.value })}
-                      className="md:col-span-2"
-                    />
-                    <Input
-                      label="Expiry Date"
-                      placeholder="MM/YY"
-                      required
-                      value={cardDetails.expiryDate}
-                      onChange={(e) => setCardDetails({ ...cardDetails, expiryDate: e.target.value })}
-                    />
-                    <Input
-                      label="CVV"
-                      placeholder="123"
-                      required
-                      value={cardDetails.cvv}
-                      onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                    />
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-900 font-medium mb-2">
+                      Multiple Payment Options Available
+                    </p>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Debit/Credit Card (Visa, Mastercard, Verve)</li>
+                      <li>• Bank Transfer</li>
+                      <li>• USSD (*737#)</li>
+                      <li>• Pay on Delivery (Cash)</li>
+                    </ul>
                   </div>
-                  <p className="text-sm text-gray-600 mt-4 flex items-center gap-2">
-                    <Lock className="w-4 h-4" />
-                    Your payment information is secure and encrypted
+                  <p className="text-xs text-gray-600 mt-4 flex items-center gap-2">
+                    <Lock className="w-3 h-3" />
+                    Secured by KidsFashion Payment Gateway
                   </p>
                 </div>
               </Card>
@@ -255,16 +239,28 @@ export default function CheckoutPage() {
                     type="submit"
                     size="lg"
                     className="w-full"
-                    disabled={isProcessing}
+                    disabled={isValidatingAddress}
                   >
-                    {isProcessing ? 'Processing...' : 'Place Order'}
+                    {isValidatingAddress ? 'Validating...' : 'Proceed to Payment'}
                   </Button>
+                  
+                  <p className="text-xs text-center text-gray-500 mt-3">
+                    By continuing, you agree to our Terms & Conditions
+                  </p>
                 </div>
               </Card>
             </div>
           </div>
         </form>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        amount={grandTotal}
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 }

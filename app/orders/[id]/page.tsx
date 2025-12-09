@@ -1,20 +1,27 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Package, Truck, CheckCircle, Home, AlertCircle, MessageSquare } from 'lucide-react';
-import { useOrderStore } from '@/lib/store';
+import { Package, Truck, CheckCircle, Home, AlertCircle, MessageSquare, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { useOrderStore, useComplaintStore } from '@/lib/store';
 import { formatPrice, formatDate } from '@/lib/utils';
+import { ComplaintType } from '@/types';
 import Button from '@/components/ui/button';
 import Card from '@/components/ui/card';
 import Badge from '@/components/ui/badge';
+import ComplaintModal from '@/components/complaint-modal';
 
 export default function OrderTrackingPage() {
   const params = useParams();
-  const { getOrderById, updateOrderStatus } = useOrderStore();
-  const order = getOrderById(params.id as string);
+  const { getOrderById, updateOrderStatus, orders } = useOrderStore();
+  const { addComplaint, getComplaintsByOrderId } = useComplaintStore();
+  const [showComplaintModal, setShowComplaintModal] = useState(false);
+  const [isConfirmingDelivery, setIsConfirmingDelivery] = useState(false);
+  
+  const order = orders.find(o => o.id === params.id as string);
 
   if (!order) {
     return (
@@ -39,12 +46,36 @@ export default function OrderTrackingPage() {
   ];
 
   const currentStepIndex = statusSteps.findIndex((step) => step.status === order.status);
+  const orderComplaints = getComplaintsByOrderId(order.id);
 
   const simulateNextStatus = () => {
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < statusSteps.length) {
       updateOrderStatus(order.id, statusSteps[nextIndex].status as any);
     }
+  };
+
+  const handleConfirmDelivery = () => {
+    setIsConfirmingDelivery(true);
+    // Simulate confirmation delay
+    setTimeout(() => {
+      updateOrderStatus(order.id, 'delivered');
+      // Update order to mark delivery as confirmed
+      const updatedOrder = { ...order, isDeliveryConfirmed: true, deliveredAt: new Date() };
+      setIsConfirmingDelivery(false);
+    }, 1000);
+  };
+
+  const handleSubmitComplaint = (type: ComplaintType, description: string) => {
+    const complaint = {
+      id: `CMP${Date.now()}`,
+      orderId: order.id,
+      type,
+      description,
+      status: 'open' as const,
+      createdAt: new Date(),
+    };
+    addComplaint(complaint);
   };
 
   const getStatusColor = (status: string) => {
@@ -244,23 +275,79 @@ export default function OrderTrackingPage() {
               </div>
             </Card>
 
+            {/* Delivery Confirmation Status */}
+            {order.isDeliveryConfirmed && (
+              <Card>
+                <div className="p-6">
+                  <div className="flex items-center gap-3 text-green-600 mb-2">
+                    <ShieldCheck className="w-6 h-6" />
+                    <h3 className="font-bold">Delivery Confirmed</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    You confirmed receipt on {order.deliveredAt ? formatDate(order.deliveredAt) : 'N/A'}
+                  </p>
+                </div>
+              </Card>
+            )}
+
+            {/* Complaints */}
+            {orderComplaints.length > 0 && (
+              <Card>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <AlertTriangle className="w-5 h-5 text-orange-600" />
+                    <h3 className="font-bold text-gray-900">Complaints ({orderComplaints.length})</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {orderComplaints.map((complaint) => (
+                      <div key={complaint.id} className="p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-sm font-medium text-gray-900 capitalize">
+                            {complaint.type.replace('-', ' ')}
+                          </p>
+                          <Badge variant={complaint.status === 'resolved' ? 'success' : 'warning'}>
+                            {complaint.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-600 line-clamp-2">{complaint.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">{formatDate(complaint.createdAt)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {/* Actions */}
             <Card>
               <div className="p-6 space-y-3">
-                <Button className="w-full gap-2">
+                {order.status === 'delivered' && !order.isDeliveryConfirmed && (
+                  <Button 
+                    onClick={handleConfirmDelivery}
+                    disabled={isConfirmingDelivery}
+                    className="w-full gap-2 bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    {isConfirmingDelivery ? 'Confirming...' : 'Confirm Receipt'}
+                  </Button>
+                )}
+                
+                {order.status === 'delivered' && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowComplaintModal(true)}
+                    className="w-full gap-2 border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                    Report Issue
+                  </Button>
+                )}
+                
+                <Button className="w-full gap-2" variant="outline">
                   <MessageSquare className="w-4 h-4" />
                   Contact Support
                 </Button>
-                {order.status === 'delivered' && (
-                  <>
-                    <Button variant="outline" className="w-full">
-                      Confirm Receipt
-                    </Button>
-                    <Button variant="outline" className="w-full">
-                      Report Issue
-                    </Button>
-                  </>
-                )}
+                
                 <Link href="/products">
                   <Button variant="outline" className="w-full">
                     Continue Shopping
@@ -271,6 +358,14 @@ export default function OrderTrackingPage() {
           </div>
         </div>
       </div>
+
+      {/* Complaint Modal */}
+      <ComplaintModal
+        isOpen={showComplaintModal}
+        onClose={() => setShowComplaintModal(false)}
+        orderId={order.id}
+        onSubmit={handleSubmitComplaint}
+      />
     </div>
   );
 }

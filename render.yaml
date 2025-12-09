@@ -1,9 +1,15 @@
 services:
   - type: web
     name: kids-fashion-store
-    env: node
+    runtime: node
+    region: oregon
+    plan: free
+    branch: main
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /

@@ -74,7 +74,9 @@ export type Color =
   | 'pastel-blue'
   | 'pastel-yellow'
   | 'mint'
-  | 'lavender';
+  | 'lavender'
+  | 'silver'
+  | 'gold';
 
 export type Gender = 'boys' | 'girls' | 'unisex';
 
@@ -105,10 +107,14 @@ export interface Order {
   total: number;
   shippingAddress: ShippingAddress;
   status: OrderStatus;
+  paymentMethod?: PaymentMethod;
+  paymentStatus?: PaymentStatus;
   createdAt: Date;
   updatedAt: Date;
   trackingNumber?: string;
   estimatedDelivery?: Date;
+  deliveredAt?: Date;
+  isDeliveryConfirmed?: boolean;
 }
 
 export type OrderStatus = 
@@ -119,6 +125,42 @@ export type OrderStatus =
   | 'out-for-delivery'
   | 'delivered'
   | 'cancelled';
+
+export type PaymentMethod = 
+  | 'card'
+  | 'bank-transfer'
+  | 'ussd'
+  | 'pay-on-delivery';
+
+export type PaymentStatus = 
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed';
+
+export interface Complaint {
+  id: string;
+  orderId: string;
+  type: ComplaintType;
+  description: string;
+  status: ComplaintStatus;
+  createdAt: Date;
+  resolvedAt?: Date;
+}
+
+export type ComplaintType = 
+  | 'wrong-item'
+  | 'damaged-item'
+  | 'late-delivery'
+  | 'quality-issue'
+  | 'missing-item'
+  | 'other';
+
+export type ComplaintStatus = 
+  | 'open'
+  | 'in-progress'
+  | 'resolved'
+  | 'closed';
 
 export interface TeamMember {
   id: string;
