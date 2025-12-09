@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -18,6 +18,7 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const product = getProductById(params.id as string);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [mainSrc, setMainSrc] = useState<string>(product.images[0]);
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [selectedColor, setSelectedColor] = useState<Color | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -40,6 +41,21 @@ export default function ProductDetailPage() {
   const discount = product.originalPrice
     ? calculateDiscount(product.originalPrice, product.price)
     : 0;
+
+  useEffect(() => {
+    setMainSrc(product.images[selectedImage]);
+  }, [selectedImage, product]);
+
+  const unoptimizedMain = useMemo(() => {
+    try {
+      const host = new URL(mainSrc).hostname.toLowerCase();
+      return host.includes('shopkiddieswearhouse.com') || host.includes('cartrollers.com') || host.includes('media.istockphoto.com');
+    } catch {
+      return false;
+    }
+  }, [mainSrc]);
+
+  const fallback = 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=800';
 
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) {
@@ -71,9 +87,12 @@ export default function ProductDetailPage() {
               className="relative aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4"
             >
               <Image
-                src={product.images[selectedImage]}
+                src={mainSrc}
                 alt={product.name}
                 fill
+                unoptimized={unoptimizedMain}
+                referrerPolicy="no-referrer"
+                onError={() => setMainSrc(fallback)}
                 className="object-cover"
               />
               {product.onSale && discount > 0 && (
@@ -94,7 +113,13 @@ export default function ProductDetailPage() {
                       selectedImage === index ? 'border-primary-500 scale-105' : 'border-gray-200'
                     }`}
                   >
-                    <Image src={image} alt={`${product.name} ${index + 1}`} fill className="object-cover" />
+                    <Image
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      fill
+                      referrerPolicy="no-referrer"
+                      className="object-cover"
+                    />
                   </button>
                 ))}
               </div>

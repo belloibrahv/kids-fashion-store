@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useMemo, useState, useEffect } from 'react';
 import { Heart, ShoppingCart, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Product } from '@/types';
@@ -19,14 +20,33 @@ export default function ProductCard({ product }: ProductCardProps) {
     ? calculateDiscount(product.originalPrice, product.price)
     : 0;
 
+  const [imgSrc, setImgSrc] = useState<string>(product.images[0]);
+  useEffect(() => {
+    setImgSrc(product.images[0]);
+  }, [product]);
+
+  const unoptimized = useMemo(() => {
+    try {
+      const host = new URL(imgSrc).hostname.toLowerCase();
+      return host.includes('shopkiddieswearhouse.com') || host.includes('cartrollers.com') || host.includes('media.istockphoto.com');
+    } catch {
+      return false;
+    }
+  }, [imgSrc]);
+
+  const fallback = 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=800';
+
   return (
     <Card hover className="group">
       <Link href={`/products/${product.id}`}>
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image
-            src={product.images[0]}
+            src={imgSrc}
             alt={product.name}
             fill
+            unoptimized={unoptimized}
+            referrerPolicy="no-referrer"
+            onError={() => setImgSrc(fallback)}
             className="object-cover group-hover:scale-110 transition-transform duration-300"
           />
           
