@@ -77,6 +77,14 @@ function ProductsContent() {
         break;
     }
 
+    const seen = new Set<string>();
+    filtered = filtered.filter((p) => {
+      const key = (p.images && p.images[0] ? p.images[0] : p.name).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     return filtered;
   }, [filter, selectedGender, selectedCategories, selectedAgeGroups, selectedColors, priceRange, sortBy]);
 

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Sparkles, TrendingUp, Gift, ShoppingBag } from 'lucide-react';
+import { Sparkles, TrendingUp, Gift, ShoppingBag, Truck, RotateCcw, Star, CreditCard } from 'lucide-react';
 import ProductCard from '@/components/product-card';
 import Button from '@/components/ui/button';
 import Badge from '@/components/ui/badge';
@@ -165,10 +165,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             {[
-              { icon: '🚚', title: 'Free Shipping', desc: 'On orders over $50' },
-              { icon: '🔄', title: 'Easy Returns', desc: '30-day return policy' },
-              { icon: '⭐', title: 'Top Quality', desc: 'Premium materials' },
-              { icon: '💳', title: 'Secure Payment', desc: 'Safe & encrypted' },
+              { Icon: Truck, title: 'Free Shipping', desc: 'On orders over $50' },
+              { Icon: RotateCcw, title: 'Easy Returns', desc: '30-day return policy' },
+              { Icon: Star, title: 'Top Quality', desc: 'Premium materials' },
+              { Icon: CreditCard, title: 'Secure Payment', desc: 'Safe & encrypted' },
             ].map((feature, index) => (
               <motion.div
                 key={feature.title}
@@ -178,7 +178,9 @@ export default function HomePage() {
                 transition={{ delay: index * 0.1 }}
                 className="text-center p-6 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <div className="text-4xl mb-3">{feature.icon}</div>
+                <div className="mb-3 flex justify-center">
+                  <feature.Icon className="w-10 h-10 text-primary-600" />
+                </div>
                 <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
                 <p className="text-gray-600">{feature.desc}</p>
               </motion.div>
