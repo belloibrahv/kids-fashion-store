@@ -68,6 +68,7 @@ export type Color =
   | 'white'
   | 'black'
   | 'gray'
+  | 'brown'
   | 'multicolor'
   | 'pastel-pink'
   | 'pastel-blue'
