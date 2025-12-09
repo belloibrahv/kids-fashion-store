@@ -25,16 +25,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     setImgSrc(product.images[0]);
   }, [product]);
 
-  const unoptimized = useMemo(() => {
-    try {
-      const host = new URL(imgSrc).hostname.toLowerCase();
-      return host.includes('shopkiddieswearhouse.com') || host.includes('cartrollers.com') || host.includes('media.istockphoto.com');
-    } catch {
-      return false;
-    }
-  }, [imgSrc]);
-
-  const fallback = 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=800';
+  const fallback =
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop stop-color='%23f97316' offset='0'/><stop stop-color='%23ec4899' offset='1'/></linearGradient></defs><rect width='800' height='800' fill='url(%23g)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='32' font-family='sans-serif'>Kids Fashion</text></svg>";
 
   return (
     <Card hover className="group">
@@ -44,7 +36,8 @@ export default function ProductCard({ product }: ProductCardProps) {
             src={imgSrc}
             alt={product.name}
             fill
-            unoptimized={unoptimized}
+            unoptimized
+            loading="lazy"
             referrerPolicy="no-referrer"
             onError={() => setImgSrc(fallback)}
             className="object-cover group-hover:scale-110 transition-transform duration-300"

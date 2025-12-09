@@ -18,7 +18,9 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const product = getProductById(params.id as string);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [mainSrc, setMainSrc] = useState<string>(product.images[0]);
+  const fallback =
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='800'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop stop-color='%23f97316' offset='0'/><stop stop-color='%23ec4899' offset='1'/></linearGradient></defs><rect width='800' height='800' fill='url(%23g)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='32' font-family='sans-serif'>Kids Fashion</text></svg>";
+  const [mainSrc, setMainSrc] = useState<string>(product ? product.images[0] : fallback);
   const [selectedSize, setSelectedSize] = useState<Size | null>(null);
   const [selectedColor, setSelectedColor] = useState<Color | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -43,19 +45,11 @@ export default function ProductDetailPage() {
     : 0;
 
   useEffect(() => {
-    setMainSrc(product.images[selectedImage]);
+    if (product) {
+      setMainSrc(product.images[selectedImage]);
+    }
   }, [selectedImage, product]);
 
-  const unoptimizedMain = useMemo(() => {
-    try {
-      const host = new URL(mainSrc).hostname.toLowerCase();
-      return host.includes('shopkiddieswearhouse.com') || host.includes('cartrollers.com') || host.includes('media.istockphoto.com');
-    } catch {
-      return false;
-    }
-  }, [mainSrc]);
-
-  const fallback = 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=800';
 
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) {
@@ -90,7 +84,8 @@ export default function ProductDetailPage() {
                 src={mainSrc}
                 alt={product.name}
                 fill
-                unoptimized={unoptimizedMain}
+                unoptimized
+                loading="lazy"
                 referrerPolicy="no-referrer"
                 onError={() => setMainSrc(fallback)}
                 className="object-cover"
@@ -117,6 +112,8 @@ export default function ProductDetailPage() {
                       src={image}
                       alt={`${product.name} ${index + 1}`}
                       fill
+                      unoptimized
+                      loading="lazy"
                       referrerPolicy="no-referrer"
                       className="object-cover"
                     />
