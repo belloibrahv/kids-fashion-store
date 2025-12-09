@@ -25,9 +25,43 @@ const itemVariants = {
 };
 
 export default function HomePage() {
-  const featuredProducts = getFeaturedProducts().slice(0, 4);
-  const newArrivals = getNewArrivals().slice(0, 4);
-  const saleProducts = getOnSaleProducts().slice(0, 4);
+  // Base lists
+  let featuredProducts = getFeaturedProducts();
+  let newArrivals = getNewArrivals();
+  let saleProducts = getOnSaleProducts();
+
+  // Deduplicate by product id across sections
+  const usedIds = new Set<string>();
+  featuredProducts = featuredProducts.filter(p => {
+    if (usedIds.has(p.id)) return false;
+    usedIds.add(p.id);
+    return true;
+  });
+  newArrivals = newArrivals.filter(p => {
+    if (usedIds.has(p.id)) return false;
+    usedIds.add(p.id);
+    return true;
+  });
+  saleProducts = saleProducts.filter(p => {
+    if (usedIds.has(p.id)) return false;
+    usedIds.add(p.id);
+    return true;
+  });
+
+  // Deduplicate within each section by primary image url
+  const dedupeByImage = (list: typeof featuredProducts) => {
+    const seen = new Set<string>();
+    return list.filter(p => {
+      const key = (p.images && p.images[0] ? p.images[0] : p.name).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+
+  featuredProducts = dedupeByImage(featuredProducts).slice(0, 4);
+  newArrivals = dedupeByImage(newArrivals).slice(0, 4);
+  saleProducts = dedupeByImage(saleProducts).slice(0, 4);
   const christmasPromo = promotions.find(p => p.title.includes('Christmas'));
 
   return (
