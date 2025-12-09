@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, User } from 'lucide-react';
 import { teamMembers } from '@/data/team';
 import Button from '@/components/ui/button';
 import Card from '@/components/ui/card';
@@ -107,9 +107,7 @@ export default function TeamPage() {
                     <div className="w-full h-full flex items-center justify-center">
                       <div className="text-center">
                         <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-white/30 flex items-center justify-center">
-                          <svg className="w-20 h-20 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
+                          <User className="w-20 h-20 text-white" strokeWidth={1.5} />
                         </div>
                         <div className="text-4xl font-bold text-white">
                           {currentMember.name.split(' ')[0]}
@@ -213,9 +211,7 @@ export default function TeamPage() {
                 }`}
               >
                 <div className="relative w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-gradient-to-br from-primary-200 to-secondary-200 flex items-center justify-center">
-                  <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
+                  <User className="w-12 h-12 text-white" strokeWidth={1.5} />
                 </div>
                 <p className="font-semibold text-sm mb-1">{member.name}</p>
                 <p className="text-xs text-gray-600 line-clamp-2">{member.role}</p>
