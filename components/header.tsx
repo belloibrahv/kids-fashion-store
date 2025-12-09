@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ShoppingCart, Search, Menu, X, Heart, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore, useSearchStore } from '@/lib/store';
@@ -10,8 +10,14 @@ import Button from './ui/button';
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const cartCount = useCartStore((state) => state.getCartCount());
   const { searchQuery, setSearchQuery } = useSearchStore();
+
+  // Prevent hydration mismatch by only showing cart count after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navigation = [
     { name: 'New Arrivals', href: '/products?filter=new' },
@@ -71,7 +77,7 @@ export default function Header() {
             {/* Cart */}
             <Link href="/cart" className="p-2 text-gray-700 hover:text-primary-500 transition-colors relative">
               <ShoppingCart className="w-5 h-5" />
-              {cartCount > 0 && (
+              {mounted && cartCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
