@@ -126,7 +126,10 @@ export default function TeamPage() {
                       <div className="inline-block px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-4">
                         {currentMember.role}
                       </div>
-                      <h2 className="text-4xl font-bold mb-4">{currentMember.name}</h2>
+                      <h2 className="text-4xl font-bold mb-2">{currentMember.name}</h2>
+                      <p className="text-gray-500 font-mono text-sm mb-4">
+                        Matric No: {currentMember.matricNumber}
+                      </p>
                       <p className="text-gray-600 text-lg leading-relaxed mb-6">
                         {currentMember.bio || 'Contributing to building an amazing e-commerce platform with cutting-edge technologies and best practices.'}
                       </p>
@@ -214,6 +217,7 @@ export default function TeamPage() {
                   <User className="w-12 h-12 text-white" strokeWidth={1.5} />
                 </div>
                 <p className="font-semibold text-sm mb-1">{member.name}</p>
+                <p className="text-xs text-gray-500 font-mono mb-1">{member.matricNumber}</p>
                 <p className="text-xs text-gray-600 line-clamp-2">{member.role}</p>
               </motion.button>
             ))}

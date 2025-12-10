@@ -165,6 +165,7 @@ export type ComplaintStatus =
 export interface TeamMember {
   id: string;
   name: string;
+  matricNumber: string;
   role: string;
   image?: string;
   bio?: string;
